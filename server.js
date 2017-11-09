@@ -116,6 +116,4 @@ if(process.env.NODE_ENV === 'production'){
 
 
 // process.env.PORT
-app.listen(8080, process.env.IP, function() {
-  console.log('server running;'+' port: '+8080+'; ip: '+process.env.IP);
-});
+app.listen(8080);
