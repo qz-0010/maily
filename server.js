@@ -116,4 +116,6 @@ if(process.env.NODE_ENV === 'production'){
 
 
 // process.env.PORT
-app.listen(8080);
+
+const PORT = process.env.PORT || 8080;
+app.listen(PORT);
