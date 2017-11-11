@@ -17,6 +17,13 @@ function authMiddleware(req,res, next) {
     next();
 }
 
+function requireCredits(req,res, next) {
+    if(req.user.credits < 1){
+        return res.status(403).send({error: 'not enought credits'})
+    }
+    next();
+}
+
 
 app.use(cookieSession({
     maxAge: 30 * 24 * 60 * 60 * 1000,
@@ -29,6 +36,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 const User = require("./models/User");
+const Survey = require("./models/Survey");
 
 // const User = mongoose.model('users');
 
@@ -100,6 +108,26 @@ app.post('/api/stripe', authMiddleware, async (req,res) => {
     req.user.credits += 5;
     const user = await req.user.save(); 
     res.send(user);
+});
+
+app.post('/api/surveys', authMiddleware, requireCredits, (req,res) => {
+    const {title,subject,body,recipients} = req.body;
+
+    const survey = new Survey({
+        title,
+        subject,
+        body,
+        recipients: recipients.split(',').map((email,i) => {
+            var re = /\S+@\S+\.\S+/;
+            if(!re.test(email)){
+                res.status(403).send({error: 'not valid email', index: i});
+                // break;
+            }
+            return email;
+        }),
+        _user: req.user.id,
+        dateSent: Date.now()
+    })
 });
 
 
