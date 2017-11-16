@@ -7,22 +7,8 @@ const keys = require("./config/keys");
 const mongoose = require("mongoose");
 const stripe = require("stripe")(keys.stripeSecretKey);
 const bodyParser = require("body-parser");
-// const Client = require("./client/src/index.js");
-// const {renderToString} = require("react-dom/server");
-
-function authMiddleware(req,res, next) {
-    if(!req.user){
-        return res.status(401).send({error: 'not authorized'})
-    }
-    next();
-}
-
-function requireCredits(req,res, next) {
-    if(req.user.credits < 1){
-        return res.status(403).send({error: 'not enought credits'})
-    }
-    next();
-}
+const requireLogin = require("./middlewares/requireLogin");
+const requireCredits = require("./middlewares/requireCredits");
 
 
 app.use(cookieSession({
@@ -36,7 +22,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 const User = require("./models/User");
-const Survey = require("./models/Survey");
 
 // const User = mongoose.model('users');
 
@@ -69,8 +54,6 @@ passport.use(new GoogleStrategy({
 }));
 
 
-
-
 app.get(
     "/api/auth/:service", 
     passport.authenticate("google", {
@@ -89,7 +72,7 @@ app.get(
     }
 );
 
-app.get('/api/logout', authMiddleware, (req,res) => {
+app.get('/api/logout', requireLogin, (req,res) => {
     req.logout();
     res.end();
 });
@@ -98,7 +81,7 @@ app.get('/api/current_user', (req,res) => {
     res.json(req.user);
 });
  
-app.post('/api/stripe', authMiddleware, async (req,res) => {
+app.post('/api/stripe', requireLogin, async (req,res) => {
     const charge = await stripe.charges.create({
         amount: 500,
         currency: 'usd',
@@ -110,26 +93,7 @@ app.post('/api/stripe', authMiddleware, async (req,res) => {
     res.send(user);
 });
 
-app.post('/api/surveys', authMiddleware, requireCredits, (req,res) => {
-    const {title,subject,body,recipients} = req.body;
-
-    const survey = new Survey({
-        title,
-        subject,
-        body,
-        recipients: recipients.split(',').map((email,i) => {
-            var re = /\S+@\S+\.\S+/;
-            if(!re.test(email)){
-                res.status(403).send({error: 'not valid email', index: i});
-                // break;
-            }
-            return email;
-        }),
-        _user: req.user.id,
-        dateSent: Date.now()
-    })
-});
-
+require('./services/surveysMail')(app);
 
 
 if(process.env.NODE_ENV === 'production'){
