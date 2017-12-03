@@ -4,12 +4,14 @@ import {BrowserRouter, Route} from "react-router-dom";
 import {connect} from "react-redux";
 import Header from "./Header";
 import Dashboard from "./Dashboard";
+import SurveyNew from "./surveys/SurveyNew";
+
 require("materialize-css/dist/css/materialize.min.css");
 
 // const Header = () => <h2>Header</h2>;
 const Landing = () => <h2>Landing</h2>;
 // const Dashboard = () => <h2>Dashboard</h2>;
-const SurveyNew = () => <h2>SurveyNew</h2>;
+// const SurveyNew = () => <h2>SurveyNew</h2>;
 // {/*const Header = () => <h2>Header</h2>;*/}
 // {/*const Header = () => <h2>Header</h2>;*/}
 
@@ -29,7 +31,7 @@ class App extends React.Component {
             			
 		return [
 					<Route exact path="/" component={Landing} />,
-            		<Route path="/surveys" component={Dashboard} key="1"/>,
+            		<Route exact path="/surveys" component={Dashboard} key="1"/>,
             		<Route exact path="/surveys/new" component={SurveyNew} key="2"/>
 				]
 

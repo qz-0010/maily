@@ -26,11 +26,15 @@ class Header extends React.Component{
 					<li key="2" style={{margin: '0 10px'}}>
 						<Payments />
 					</li>,
-					<li key="4">
-						Credits: {this.props.auth.credits}
-					</li>,
-					<li key="3" className="">
-						<a href="#" onClick={this.props.logout}>Logout</a>
+					<li key="3" className="right">
+						<ul>
+							<li>
+								Credits: {this.props.auth.credits}
+							</li>
+							<li style={{margin: '0 15px'}}>
+								<button className="btn" onClick={this.props.logout}>Logout</button>
+							</li>
+						</ul>
 					</li>
 				]
 					
